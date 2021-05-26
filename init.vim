@@ -25,10 +25,13 @@ call plug#end()
 set number
 syntax on
 set termguicolors
+set mouse +=a
 colorscheme jellybeans
 
 nnoremap <F2> :NERDTreeToggle<CR>
 nnoremap <F1> :Files<CR>
+nnoremap <C-p> :Ag<CR>
+nnoremap <Space> :nohlsearch<CR>
 imap jk <ESC>
 imap JK <ESC>
 

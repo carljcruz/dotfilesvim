@@ -3,18 +3,20 @@ call plug#begin('~/.vim/plugged')
 " Make sure you use single quotes
 Plug 'ryanoasis/vim-devicons'
 Plug 'preservim/nerdtree'
+Plug 'altercation/vim-colors-solarized'
 Plug 'sheerun/vim-polyglot'
 Plug 'junegunn/fzf', { 'do': { -> fzf#install() } }
 Plug 'junegunn/fzf.vim'
 Plug 'pangloss/vim-javascript'
 Plug 'overcache/NeoSolarized'
-Plug 'NLKNguyen/papercolor-theme'
 Plug 'tpope/vim-fugitive'
 Plug 'vim-airline/vim-airline'
 Plug 'vim-airline/vim-airline-themes'
 Plug 'nanotech/jellybeans.vim'
-Plug 'glepnir/lspsaga.nvim'
 Plug 'sbdchd/neoformat'
+Plug 'dracula/vim', { 'as': 'dracula' }
+Plug 'kyazdani42/nvim-web-devicons'
+Plug 'folke/trouble.nvim'
 " main one
 Plug 'ms-jpq/coq_nvim', {'branch': 'coq'}
 " 9000+ Snippets
@@ -22,44 +24,90 @@ Plug 'ms-jpq/coq.artifacts', {'branch': 'artifacts'}
 
 Plug 'windwp/nvim-autopairs'
 Plug 'neovim/nvim-lspconfig'
+Plug 'glepnir/lspsaga.nvim'
 
+Plug 'NLKNguyen/papercolor-theme'
+
+Plug 'navarasu/onedark.nvim'
 
 " Initialize plugin system
 call plug#end()
+
+
+set termguicolors
+colorscheme NeoSolarized
+set background=dark
 let g:coq_settings = { 'auto_start': 'shut-up' }
 set number
 syntax on
-set termguicolors
 set mouse +=a
-colorscheme NeoSolarized
-set background=dark
 nnoremap q <c-v>
 nnoremap <F2> :NERDTreeToggle<CR>
+nnoremap <F3> :Neoformat<CR>
 nnoremap <F1> :Files<CR>
 nnoremap <C-p> :Ag<CR>
 nnoremap <Space> :nohlsearch<CR>
 imap jk <ESC>
 imap JK <ESC>
 let mapleader = ","
+" TroubleToggle
+nnoremap <leader>xx <cmd>TroubleToggle<cr>
+nnoremap gR <cmd>TroubleToggle lsp_references<cr>
 
-" lsp saga
-nnoremap <silent>K :Lspsaga hover_doc<CR>
-nnoremap <silent>gh :Lspsaga lsp_finder<CR>
-nnoremap <silent><leader>ca :Lspsaga code_action<CR>
-vnoremap <silent><leader>ca :<C-U>Lspsaga range_code_action<CR>
-nnoremap <silent>gr :Lspsaga rename<CR>
+
+nnoremap <silent> gh :Lspsaga lsp_finder<CR>
 nnoremap <silent> gd :Lspsaga preview_definition<CR>
-nnoremap <silent> <C-t> :Lspsaga open_floaterm<CR>
+nnoremap <silent>K :Lspsaga hover_doc<CR>
+nnoremap <silent>gr :Lspsaga rename<CR>
 
+nnoremap <silent> ff    <cmd>lua vim.lsp.buf.formatting_sync(nil, 1000)<CR>
+autocmd BufWritePre *.go lua vim.lsp.buf.formatting()
 
 
 set encoding=utf-8
 
 lua << EOF
-
 local nvim_lsp = require('lspconfig')
-local saga = require 'lspsaga'
+
 local coq = require "coq" -- add this
+local saga = require 'lspsaga'
+require("trouble").setup {
+    -- your configuration comes here
+    -- or leave it empty to use the default settings
+    -- refer to the configuration section below
+  }
+
+local on_attach = function(client, bufnr)
+  local function buf_set_keymap(...) vim.api.nvim_buf_set_keymap(bufnr, ...) end
+  local function buf_set_option(...) vim.api.nvim_buf_set_option(bufnr, ...) end
+
+  -- Enable completion triggered by <c-x><c-o>
+  buf_set_option('omnifunc', 'v:lua.vim.lsp.omiifunc')
+
+  -- Mappings.
+  local opts = { noremap=true, silent=true }
+
+  -- See `:help vim.lsp.*` for documentation on any of the below functions
+  buf_set_keymap('n', 'gD', '<cmd>lua vim.lsp.buf.declaration()<CR>', opts)
+  buf_set_keymap('n', 'gd', '<cmd>lua vim.lsp.buf.definition()<CR>', opts)
+  buf_set_keymap('n', 'K', '<cmd>lua vim.lsp.buf.hover()<CR>', opts)
+  buf_set_keymap('n', 'gi', '<cmd>lua vim.lsp.buf.implementation()<CR>', opts)
+  buf_set_keymap('n', '<C-k>', '<cmd>lua vim.lsp.buf.signature_help()<CR>', opts)
+  buf_set_keymap('n', '<space>wa', '<cmd>lua vim.lsp.buf.add_workspace_folder()<CR>', opts)
+  buf_set_keymap('n', '<space>wr', '<cmd>lua vim.lsp.buf.remove_workspace_folder()<CR>', opts)
+  buf_set_keymap('n', '<space>wl', '<cmd>lua print(vim.inspect(vim.lsp.buf.list_workspace_folders()))<CR>', opts)
+  buf_set_keymap('n', '<space>D', '<cmd>lua vim.lsp.buf.type_definition()<CR>', opts)
+  buf_set_keymap('n', '<space>rn', '<cmd>lua vim.lsp.buf.rename()<CR>', opts)
+  buf_set_keymap('n', '<space>ca', '<cmd>lua vim.lsp.buf.code_action()<CR>', opts)
+  buf_set_keymap('n', 'gr', '<cmd>lua vim.lsp.buf.references()<CR>', opts)
+  buf_set_keymap('n', '<space>e', '<cmd>lua vim.diagnostic.open_float()<CR>', opts)
+  buf_set_keymap('n', '[d', '<cmd>lua vim.diagnostic.goto_prev()<CR>', opts)
+  buf_set_keymap('n', ']d', '<cmd>lua vim.diagnostic.goto_next()<CR>', opts)
+  buf_set_keymap('n', '<space>q', '<cmd>lua vim.diagnostic.setloclist()<CR>', opts)
+  buf_set_keymap('n', '<space>f', '<cmd>lua vim.lsp.buf.formatting()<CR>', opts)
+
+end
+
 
 
 require'lspconfig'.pyright.setup{
@@ -76,19 +124,10 @@ cmd =  {"pyright-langserver", "--stdio"},
   filetypes = { "python" }
 
 }
-require'lspconfig'.html.setup{
-cmd = { "vscode-html-language-server", "--stdio" },
-    filetypes = { "html" },
-    init_options = {
-      configurationSection = { "html", "css", "javascript" },
-      embeddedLanguages = {
-        css = true,
-        javascript = true
-      }
-}
-}
+
+
 require'lspconfig'.tsserver.setup{
-cmd = { "typescript-language-server", "--stdio" },
+		cmd = { "typescript-language-server", "--stdio" },
     filetypes = { "javascript", "javascriptreact", "javascript.jsx", "typescript", "typescriptreact", "typescript.tsx" },
     init_options = {
       hostInfo = "neovim"
@@ -98,7 +137,6 @@ cmd = { "typescript-language-server", "--stdio" },
 require('nvim-autopairs').setup({
   disable_filetype = { "TelescopePrompt" , "vim" },
 })
-
 local remap = vim.api.nvim_set_keymap
 local npairs = require('nvim-autopairs')
 
@@ -139,13 +177,6 @@ remap('i', '<bs>', 'v:lua.MUtils.BS()', { expr = true, noremap = true })
 
 
 
-saga.init_lsp_saga {
-  error_sign = '❌',
-  warn_sign = '❕',
-  hint_sign = '⁉',
-  infor_sign = '',
-  border_style = "round",
-}
 
 -- Use an on_attach function to only map the following keys
 -- after the language server attaches to the current buffer
@@ -165,7 +196,7 @@ end
 
 -- Use a loop to conveniently call 'setup' on multiple servers and
 -- map buffer local keybindings when the language server attaches
-local servers = { 'pyright', 'html', 'tsserver' }
+local servers = { 'pyright',  'tsserver' }
 for _, lsp in ipairs(servers) do
   nvim_lsp[lsp].setup {
     on_attach = on_attach,
@@ -174,13 +205,16 @@ for _, lsp in ipairs(servers) do
     }
   }
 end
+
+
+require'lspconfig'.html.setup {
+  cmd = { "vscode-html-language-server.cmd", "--stdio" },
+  capabilities = capabilities,
+}
+
 EOF
 
 
-augroup fmt
-  autocmd!
-  autocmd BufWritePre * undojoin | Neoformat
-augroup END
 highlight clear LineNr
 set cmdheight=1
 
@@ -188,3 +222,4 @@ set cmdheight=1
 " neovide
 let neovide_remember_window_size = v:true
 let g:coq_settings = { 'display.pum.fast_close': v:false }
+

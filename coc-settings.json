@@ -1,12 +1,6 @@
 {
   "coc.preferences.formatOnSaveFiletypes": [
-    "css",
-    "markdown",
-    "python",
-    "html",
-    "javascript",
-		"json"
-
+    "'css', 'javascript', 'html', 'json'"
   ],
   "explorer.file.showHiddenFiles": true,
   "explorer.width": 30,

@@ -1,9 +1,10 @@
 call plug#begin()
 Plug 'fatih/vim-go', { 'tag': '*' }
 
-set mouse =a 
+set mouse =a
 set clipboard=unnamed
 
+Plug 'easymotion/vim-easymotion'
 Plug 'neoclide/coc.nvim', {'branch': 'release'}
 Plug 'sainnhe/sonokai'
 Plug 'junegunn/fzf', { 'do': { -> fzf#install() } }
@@ -11,21 +12,50 @@ Plug 'junegunn/fzf.vim'
 Plug 'pangloss/vim-javascript'
 Plug 'sheerun/vim-polyglot'
 Plug 'joshdick/onedark.vim'
+Plug 'preservim/tagbar'
+Plug 'projekt0n/github-nvim-theme'
+Plug 'vim-airline/vim-airline'
+Plug 'vim-airline/vim-airline-themes'
+Plug 'sbdchd/neoformat'
+
 
 " Initialize plugin system
 call plug#end()
 
+let g:github_comment_style = "NONE"
+let g:github_keyword_style = "NONE"
+let g:github_function_style = "NONE"
+let g:github_variable_style = "NONE"
+
 inoremap jk <ESC>
 set number
 set termguicolors
-colorscheme onedark
+colorscheme github_dark
+let g:airline_theme='base16_google_dark'
 let mapleader =","
+nmap <F8> :TagbarToggle<CR>
+let g:airline_powerline_fonts = 1
+
+noremap <leader>1 1gt
+noremap <leader>2 2gt
+noremap <leader>3 3gt
+noremap <leader>4 4gt
+noremap <leader>5 5gt
+noremap <leader>6 6gt
+noremap <leader>7 7gt
+noremap <leader>8 8gt
+noremap <leader>9 9gt
+noremap <leader>0 :tablast<cr>
 
 
 nnoremap <C-P> :Files<CR>
+nnoremap <F1> :Ag<CR>
+nnoremap <space> :nohlsearch<CR>
 
 nmap <F2> <Cmd>CocCommand explorer<CR>
 nmap <F3> :Prettier<CR>
+nmap <F4> :Neoformat<CR>
+
 
 " coc
 " Set internal encoding of vim, not needed on neovim, since coc.nvim using some
@@ -187,6 +217,8 @@ nnoremap <silent><nowait> <space>j  :<C-u>CocNext<CR>
 nnoremap <silent><nowait> <space>k  :<C-u>CocPrev<CR>
 " Resume latest coc list.
 nnoremap <silent><nowait> <space>p  :<C-u>CocListResume<CR>
+
+set statusline^=%{coc#status()}%{get(b:,'coc_current_function','')}
 " coc end
 
 
@@ -199,3 +231,7 @@ augroup END
 
 command! -nargs=0 Prettier :CocCommand prettier.forceFormatDocument
 
+" Empty value to disable preview window altogether
+let g:fzf_preview_window = []
+highlight CursorLine cterm=NONE ctermbg=NONE ctermfg=NONE guibg=NONE guifg=NONE
+set cursorline
